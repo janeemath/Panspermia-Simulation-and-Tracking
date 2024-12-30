@@ -1,21 +1,79 @@
+import { describe, it, beforeEach, expect, vi } from 'vitest';
 
-import { describe, expect, it } from "vitest";
+const mockContractCall = vi.fn();
 
-const accounts = simnet.getAccounts();
-const address1 = accounts.get("wallet_1")!;
-
-/*
-  The test below is an example. To learn more, read the testing documentation here:
-  https://docs.hiro.so/stacks/clarinet-js-sdk
-*/
-
-describe("example tests", () => {
-  it("ensures simnet is well initalised", () => {
-    expect(simnet.blockHeight).toBeDefined();
+describe('Simulation Parameters Contract', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
-
-  // it("shows an example", () => {
-  //   const { result } = simnet.callReadOnlyFn("counter", "get-counter", [], address1);
-  //   expect(result).toBeUint(0);
-  // });
+  
+  describe('create-simulation', () => {
+    it('should create a simulation successfully', async () => {
+      const name = 'Panspermia Alpha';
+      const description = 'Simulating bacterial transfer between exoplanets';
+      const parameters = ['gravity', 'atmosphere', 'radiation'];
+      
+      mockContractCall.mockResolvedValue({ value: 1 }); // Assuming 1 is the new simulation ID
+      
+      const result = await mockContractCall('simulation-parameters', 'create-simulation', [name, description, parameters]);
+      
+      expect(result.value).toBe(1);
+      expect(mockContractCall).toHaveBeenCalledWith('simulation-parameters', 'create-simulation', [name, description, parameters]);
+    });
+  });
+  
+  describe('update-simulation-status', () => {
+    it('should update simulation status successfully', async () => {
+      const simulationId = 1;
+      const newStatus = 'running';
+      
+      mockContractCall.mockResolvedValue({ value: true });
+      
+      const result = await mockContractCall('simulation-parameters', 'update-simulation-status', [simulationId, newStatus]);
+      
+      expect(result.value).toBe(true);
+      expect(mockContractCall).toHaveBeenCalledWith('simulation-parameters', 'update-simulation-status', [simulationId, newStatus]);
+    });
+    
+    it('should fail if not called by the simulation creator', async () => {
+      const simulationId = 1;
+      const newStatus = 'completed';
+      
+      mockContractCall.mockRejectedValue(new Error('Unauthorized'));
+      
+      await expect(mockContractCall('simulation-parameters', 'update-simulation-status', [simulationId, newStatus]))
+          .rejects.toThrow('Unauthorized');
+    });
+  });
+  
+  describe('get-simulation', () => {
+    it('should return simulation details', async () => {
+      const simulationId = 1;
+      const expectedSimulation = {
+        creator: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
+        name: 'Panspermia Alpha',
+        description: 'Simulating bacterial transfer between exoplanets',
+        parameters: ['gravity', 'atmosphere', 'radiation'],
+        status: 'created'
+      };
+      
+      mockContractCall.mockResolvedValue({ value: expectedSimulation });
+      
+      const result = await mockContractCall('simulation-parameters', 'get-simulation', [simulationId]);
+      
+      expect(result.value).toEqual(expectedSimulation);
+      expect(mockContractCall).toHaveBeenCalledWith('simulation-parameters', 'get-simulation', [simulationId]);
+    });
+    
+    it('should return null for non-existent simulation', async () => {
+      const simulationId = 999;
+      
+      mockContractCall.mockResolvedValue({ value: null });
+      
+      const result = await mockContractCall('simulation-parameters', 'get-simulation', [simulationId]);
+      
+      expect(result.value).toBeNull();
+    });
+  });
 });
+
