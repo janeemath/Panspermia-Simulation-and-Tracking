@@ -7,7 +7,6 @@ A decentralized platform for simulating and analyzing theoretical panspermia sce
 DAPSTP enables researchers and space enthusiasts to create, run, and analyze complex panspermia simulations through a decentralized network. The platform combines blockchain technology with scientific computing to model potential scenarios of life spreading through space.
 
 ## Core Features
-
 ### Panspermia Simulation Engine
 
 - Define complex simulation parameters including:
